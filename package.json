@@ -1,0 +1,35 @@
+{
+  "name": "saylani-job-bank",
+  "private": true,
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test --continue",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "infra:up": "docker compose up -d --wait postgres seaweedfs redis mailpit && docker compose run --rm s3-init",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && pnpm infra:up",
+    "db:generate": "pnpm --filter @jobbank/db db:generate",
+    "db:migrate": "pnpm --filter @jobbank/db db:migrate",
+    "db:seed": "pnpm --filter @jobbank/db db:seed",
+    "db:studio": "pnpm --filter @jobbank/db db:studio",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.7.0",
+    "turbo": "^2.11.6",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+@import './theme.css';
+@import './utilities.css';
+
+/* Dark mode follows the data-theme attribute set by ThemeProvider (system-aware). */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Map semantic CSS variables → Tailwind colour utilities (bg-surface, text-fg-muted, …). */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-fg: var(--primary-soft-fg);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-fg: var(--accent-soft-fg);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-fg: var(--success-soft-fg);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-soft-fg: var(--warning-soft-fg);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-fg: var(--danger-soft-fg);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-soft-fg: var(--info-soft-fg);
+  --color-neutral-soft: var(--neutral-soft);
+  --color-neutral-soft-fg: var(--neutral-soft-fg);
+
+  --color-focus: var(--focus);
+  --color-overlay: var(--overlay);
+
+  --shadow-card:
+    0 1px 2px hsl(var(--shadow-color) / 0.06), 0 1px 3px hsl(var(--shadow-color) / 0.08);
+  --shadow-popover:
+    0 4px 6px hsl(var(--shadow-color) / 0.08), 0 10px 24px hsl(var(--shadow-color) / 0.14);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--primary-soft);
+    color: var(--primary-soft-fg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,111 @@
+name: jobbank
+
+# Config files are injected inline (not bind-mounted) so Docker never needs macOS
+# permission to read the project folder — that prompt can silently hang container starts.
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jobbank
+      POSTGRES_PASSWORD: jobbank
+      POSTGRES_DB: jobbank
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    configs:
+      - source: pg-init-roles
+        target: /docker-entrypoint-initdb.d/01-roles.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U jobbank -d jobbank']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Local S3-compatible object storage (production uses Cloudflare R2 / AWS S3).
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    restart: unless-stopped
+    command: >
+      server -dir=/data -ip=seaweedfs -ip.bind=0.0.0.0
+      -master.volumeSizeLimitMB=64 -volume.max=20
+      -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    ports:
+      - '8333:8333'
+    volumes:
+      - s3data:/data
+    configs:
+      - source: seaweedfs-s3
+        target: /etc/seaweedfs/s3.json
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:9333/cluster/status || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  s3-init:
+    image: chrislusf/seaweedfs:latest
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      if echo 's3.bucket.list' | weed shell -master=seaweedfs:9333 | grep -q jobbank-documents;
+      then echo 'bucket exists';
+      else echo 's3.bucket.create -name jobbank-documents' | weed shell -master=seaweedfs:9333;
+      fi
+      "
+    restart: 'no'
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6380:6379'
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+volumes:
+  pgdata:
+  s3data:
+  redisdata:
+
+configs:
+  pg-init-roles:
+    content: |
+      -- Runs once, on first container start (empty volume) — local development only.
+      -- In staging/production these roles are provisioned by infrastructure, not by this file.
+      --
+      -- jobbank  : owner / migrator (created by the image via POSTGRES_USER)
+      -- app_rw   : runtime role used by the Next.js app. Privileges are granted by
+      --            migrations; append-only tables get INSERT/SELECT only.
+      CREATE ROLE app_rw LOGIN PASSWORD 'app_rw';
+      GRANT CONNECT ON DATABASE jobbank TO app_rw;
+
+      CREATE DATABASE jobbank_test OWNER jobbank;
+      GRANT CONNECT ON DATABASE jobbank_test TO app_rw;
+  seaweedfs-s3:
+    content: |
+      {
+        "identities": [
+          {
+            "name": "jobbank-dev",
+            "credentials": [{ "accessKey": "jobbank", "secretKey": "jobbank-dev-secret" }],
+            "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+          }
+        ]
+      }

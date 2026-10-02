@@ -1,0 +1,102 @@
+/*
+ * Semantic colour tokens. Components use ONLY these (via the Tailwind classes mapped in
+ * global.css, e.g. bg-surface, text-fg-muted, bg-primary) so light/dark switch for free.
+ * Contrast: every *-fg / fg / fg-muted pairing meets WCAG AA (≥ 4.5:1) on its background.
+ */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f6f8f7;
+  --surface: #ffffff;
+  --surface-muted: #f0f3f2;
+  --surface-sunken: #e8edeb;
+  --border: #d9e1de;
+  --border-strong: #b5c2bd;
+
+  --fg: #0f1a16;
+  --fg-muted: #46544f;
+  --fg-subtle: #5f6d68;
+
+  /* Brand — Saylani green (primary) + blue (accent) */
+  --primary: #0f7a3d;
+  --primary-hover: #0b6331;
+  --primary-fg: #ffffff;
+  --primary-soft: #e4f3ea;
+  --primary-soft-fg: #0b5a2d;
+
+  --accent: #1e5fae;
+  --accent-hover: #184e8f;
+  --accent-fg: #ffffff;
+  --accent-soft: #e7effa;
+  --accent-soft-fg: #164a88;
+
+  --success: #15803d;
+  --success-soft: #e5f5ea;
+  --success-soft-fg: #14532d;
+  --warning: #b45309;
+  --warning-soft: #fdf2e0;
+  --warning-soft-fg: #78350f;
+  --danger: #c0262d;
+  --danger-hover: #a01f25;
+  --danger-fg: #ffffff;
+  --danger-soft: #fceaea;
+  --danger-soft-fg: #8b1c21;
+  --info: #0369a1;
+  --info-soft: #e3f1fa;
+  --info-soft-fg: #0c4a6e;
+  --neutral-soft: #ecefee;
+  --neutral-soft-fg: #36423e;
+
+  --focus: #1e5fae;
+  --overlay: rgb(10 18 15 / 0.5);
+  --shadow-color: 160 20% 10%;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0b1210;
+  --surface: #111a17;
+  --surface-muted: #17221e;
+  --surface-sunken: #0d1613;
+  --border: #25342f;
+  --border-strong: #3a4c45;
+
+  --fg: #e7eeeb;
+  --fg-muted: #a9b8b2;
+  --fg-subtle: #8d9c96;
+
+  --primary: #3dbb72;
+  --primary-hover: #57c987;
+  --primary-fg: #04140b;
+  --primary-soft: #12301f;
+  --primary-soft-fg: #93e2b4;
+
+  --accent: #6ea8ef;
+  --accent-hover: #8bbaf3;
+  --accent-fg: #06152a;
+  --accent-soft: #142740;
+  --accent-soft-fg: #abcbf5;
+
+  --success: #4ade80;
+  --success-soft: #10301e;
+  --success-soft-fg: #9de7b8;
+  --warning: #f5a524;
+  --warning-soft: #33250b;
+  --warning-soft-fg: #f8d08a;
+  --danger: #f26b6b;
+  --danger-hover: #f58787;
+  --danger-fg: #2a0506;
+  --danger-soft: #3a1517;
+  --danger-soft-fg: #f8adad;
+  --info: #38bdf8;
+  --info-soft: #0b2a3a;
+  --info-soft-fg: #9fd9f6;
+  --neutral-soft: #1d2925;
+  --neutral-soft-fg: #c5d1cc;
+
+  --focus: #8bbaf3;
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow-color: 160 30% 2%;
+}

@@ -1,0 +1,36 @@
+/* Project-specific utilities (Tailwind v4 @utility). */
+
+/* Consistent, highly visible keyboard focus (WCAG 2.4.7 / 2.4.11). */
+@utility focus-ring {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Page gutter: 16px on phones, growing on larger screens. */
+@utility page-gutter {
+  padding-inline: 1rem;
+  @media (width >= 48rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 80rem) {
+    padding-inline: 2rem;
+  }
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* Numbers that should not jitter as they change (counters, money, distances). */
+@utility numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollable but without a visible bar (tab strips). Still scrolls by touch, wheel and keyboard. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: jobbank
+          POSTGRES_PASSWORD: jobbank
+          POSTGRES_DB: jobbank
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd "pg_isready -U jobbank -d jobbank"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+
+    env:
+      DATABASE_URL: postgres://app_rw:app_rw@localhost:5433/jobbank
+      DATABASE_MIGRATOR_URL: postgres://jobbank:jobbank@localhost:5433/jobbank
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      S3_ENDPOINT: http://localhost:8333
+      S3_ACCESS_KEY_ID: ci
+      S3_SECRET_ACCESS_KEY: ci
+      S3_BUCKET: jobbank-documents
+      S3_FORCE_PATH_STYLE: 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - run: corepack enable
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Mirrors the pg-init-roles config in docker-compose.yml (service containers can't take it).
+      - name: Provision database roles
+        run: |
+          PGPASSWORD=jobbank psql -h localhost -p 5433 -U jobbank -d jobbank -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE app_rw LOGIN PASSWORD 'app_rw';
+          GRANT CONNECT ON DATABASE jobbank TO app_rw;
+          CREATE DATABASE jobbank_test OWNER jobbank;
+          GRANT CONNECT ON DATABASE jobbank_test TO app_rw;
+          SQL
+
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm db:migrate
+      - run: pnpm test
+      - run: pnpm build

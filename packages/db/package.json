@@ -1,0 +1,38 @@
+{
+  "name": "@jobbank/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./migrate": "./src/scripts/migrate.ts",
+    "./seed": "./src/scripts/seed.ts",
+    "./seed/dev-data": "./src/seed/dev-data.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/scripts/migrate.ts",
+    "db:seed": "tsx src/scripts/seed.ts",
+    "db:studio": "drizzle-kit studio",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@jobbank/shared": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@jobbank/config": "workspace:*",
+    "@types/node": "^24.0.0",
+    "better-auth": "1.7.6",
+    "dotenv": "^17.0.0",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9.39.5",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3"
+  }
+}
