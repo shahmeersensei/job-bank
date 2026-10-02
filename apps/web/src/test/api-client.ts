@@ -2,6 +2,7 @@ import { DEV_PASSWORD } from '@jobbank/db/seed/dev-data';
 import * as OTPAuth from 'otpauth';
 import postgres from 'postgres';
 import { afterAll, expect } from 'vitest';
+import { devOutbox } from '@/lib/sms/sms';
 
 /**
  * Integration-test HTTP helpers: call App Router route handlers directly with a cookie jar,
@@ -107,6 +108,8 @@ const routes = {
   verify2fa: () => import('@/app/api/v1/auth/2fa/verify/route').then((m) => m.POST),
   enroll: () => import('@/app/api/v1/account/2fa/enroll/route').then((m) => m.POST),
   confirm: () => import('@/app/api/v1/account/2fa/confirm/route').then((m) => m.POST),
+  otpRequest: () => import('@/app/api/v1/auth/otp/request/route').then((m) => m.POST),
+  otpVerify: () => import('@/app/api/v1/auth/otp/verify/route').then((m) => m.POST),
 };
 
 /** Signs in with email + password; completes the authenticator step when the account has one. */
@@ -164,3 +167,27 @@ export async function signInAdmin(email: string): Promise<Jar> {
 
 export const uniqueEmail = (prefix: string) =>
   `${prefix}.${crypto.randomUUID().slice(0, 8)}@jobbank.test`;
+
+/** A random, valid Pakistani mobile number (E.164) — the test database persists. */
+export const randomPhone = () =>
+  `+92345${String(Math.floor(Math.random() * 1e7)).padStart(7, '0')}`;
+
+/** Signs in (or signs up) an applicant by phone, reading the code from the dev SMS outbox. */
+export async function signInApplicant(phone: string): Promise<Jar> {
+  const jar = new Jar();
+  const requested = await call(await routes.otpRequest(), '/api/v1/auth/otp/request', {
+    method: 'POST',
+    body: { phone },
+  });
+  expect(requested.status, JSON.stringify(requested.body)).toBe(202);
+  const message = [...devOutbox].reverse().find((m) => m.to === phone);
+  const code = message?.message.match(/\b(\d{6})\b/)?.[1];
+  if (!code) throw new Error(`no SMS captured for ${phone}`);
+  const verified = await call(await routes.otpVerify(), '/api/v1/auth/otp/verify', {
+    method: 'POST',
+    body: { phone, code },
+    jar,
+  });
+  expect(verified.status, JSON.stringify(verified.body)).toBe(200);
+  return jar;
+}

@@ -1,6 +1,6 @@
 # Saylani Job Bank — Project Handoff
 
-> Last updated: **2 Oct 2026** · Status: **M0–M4 verified; M5 built and waiting for the owner's check** · Next: **M6 — Applicant domain** (after the owner's "go")
+> Last updated: **2 Oct 2026** · Status: **M0–M6 complete; the owner accepted M6** · Next: **M7 — Company & Verification**
 
 This document hands the project over between Claude sessions. It covers:
 
@@ -97,6 +97,23 @@ Related documents:
    - The branch form's Save button stayed stuck after a save on the same page.
    - A branch save audited unchanged fields.
 
+9. **M6 Applicant domain.** The owner accepted every recommended default (details in `IMPLEMENTATION_PLAN.md`, "M6 decisions"):
+   - profiles **activate automatically** once personal details, home pin + branch and both CNIC images are in; staff identity verification is a separate check (M10 should require it before referral)
+   - any active branch may be chosen (nearest pre-selected); after activation only Branch Admin / Super Admin can transfer
+   - a duplicate CNIC gets a 409 naming the branch to contact; staff can move a profile to a new mobile number
+   - CNIC, names and DOB lock once verified; staff corrections (with a reason) reset the identity check
+   - minimum age 18; gender Male / Female / Prefer not to say; father's/husband's name required; CNIC stored in full, never shown to employers
+   - applicants pause/resume their own profile; staff deactivate with a reason
+
+   Built: 10 applicant tables, 22 API routes, the 7-step profile wizard, applicant overview and Documents page, and staff/Branch Admin/Super Admin applicant search and detail pages (identity check, audited document views, corrections, mobile change, deactivate, transfer). Also: the `DocumentList` organism, a compact Stepper for long wizards, and an `isUniqueViolation` kernel helper.
+
+   The owner accepted M6 on 2 Oct 2026.
+
+   Fixed along the way:
+   - A server page imported a constant from a `'use client'` module (it arrives as a client reference, not the value). Constants needed by server pages now live in plain modules.
+   - A `useEffect(() => fn())` shorthand turned `fn`'s return value into the effect cleanup, which looped. Use a block body.
+   - ESLint now ignores alternate Next build folders (`.next-*/`), e.g. `.next-build`.
+
 ---
 
 ## 3. Tech stack (final)
@@ -120,67 +137,48 @@ Related documents:
 
 The full plan is in `IMPLEMENTATION_PLAN.md`. The status of each module:
 
-| #      | Module                                                                     | Phase | Status                                                       |
-| ------ | -------------------------------------------------------------------------- | ----- | ------------------------------------------------------------ |
-| M0     | Infrastructure & Tooling                                                   | 0     | ✅ Done                                                      |
-| M1     | Design System & Atomic Components                                          | 0     | ✅ Done (4 domain organisms moved to M6/7/10/11/12)          |
-| M2     | Shared Kernel                                                              | 0     | ✅ Done (also built the `audit_logs` table early)            |
-| M3     | Auth, RBAC & Branch Scoping                                                | 1     | ✅ Done                                                      |
-| M4     | Branch & User Management (+ 2FA, employer email codes, password reset)     | 1     | ✅ Done                                                      |
-| **M5** | **Master Data & System Settings**                                          | 1     | 🟡 **Built, awaiting owner check**                           |
-| M6     | Applicant domain (profile wizard, location pin, documents, identity check) | 1     | ⬜ Not started                                               |
-| M7     | Company & Verification (verifier queue, SLA, state machine)                | 1     | ⬜ Not started                                               |
-| M18    | Role dashboards: basic Super Admin and Branch Admin (KPI tiles)            | 1     | 🟡 Shells only (welcome pages)                               |
-| M8     | Jobs                                                                       | 2     | ⬜                                                           |
-| M9     | Geospatial matching engine                                                 | 2     | ⬜ (PostGIS helpers exist in `lib/geospatial`)               |
-| M10    | Match Case & Referral (+ masked candidate view)                            | 2     | ⬜                                                           |
-| M11    | Interviews (physical only)                                                 | 2–3   | ⬜                                                           |
-| M12    | Decisions & Counteroffers (append-only)                                    | 3     | ⬜                                                           |
-| M13    | Placement & Follow-ups (Day 7/30/90/180)                                   | 3–4   | ⬜                                                           |
-| M14    | Blacklist & Restrictions                                                   | 4     | ⬜                                                           |
-| M15    | Audit (explorer UI, partitioning)                                          | 4     | 🟡 Table + writers done in M2; UI not started                |
-| M16    | Notifications (in-app, SMS, email, push)                                   | 4     | 🟡 Mailer + dev SMS sender exist; no notification system yet |
-| M17    | Reporting & Analytics                                                      | 4     | ⬜                                                           |
-| M19    | PWA & Performance                                                          | 4     | ⬜                                                           |
+| #      | Module                                                                         | Phase | Status                                                       |
+| ------ | ------------------------------------------------------------------------------ | ----- | ------------------------------------------------------------ |
+| M0     | Infrastructure & Tooling                                                       | 0     | ✅ Done                                                      |
+| M1     | Design System & Atomic Components                                              | 0     | ✅ Done (4 domain organisms moved to M6/7/10/11/12)          |
+| M2     | Shared Kernel                                                                  | 0     | ✅ Done (also built the `audit_logs` table early)            |
+| M3     | Auth, RBAC & Branch Scoping                                                    | 1     | ✅ Done                                                      |
+| M4     | Branch & User Management (+ 2FA, employer email codes, password reset)         | 1     | ✅ Done                                                      |
+| M5     | Master Data & System Settings                                                  | 1     | ✅ Done                                                      |
+| **M6** | **Applicant domain (profile wizard, location pin, documents, identity check)** | 1     | ✅ Done                                                      |
+| M7     | Company & Verification (verifier queue, SLA, state machine)                    | 1     | ⏭️ **NEXT**                                                  |
+| M18    | Role dashboards: basic Super Admin and Branch Admin (KPI tiles)                | 1     | 🟡 Shells only (welcome pages)                               |
+| M8     | Jobs                                                                           | 2     | ⬜                                                           |
+| M9     | Geospatial matching engine                                                     | 2     | ⬜ (PostGIS helpers exist in `lib/geospatial`)               |
+| M10    | Match Case & Referral (+ masked candidate view)                                | 2     | ⬜                                                           |
+| M11    | Interviews (physical only)                                                     | 2–3   | ⬜                                                           |
+| M12    | Decisions & Counteroffers (append-only)                                        | 3     | ⬜                                                           |
+| M13    | Placement & Follow-ups (Day 7/30/90/180)                                       | 3–4   | ⬜                                                           |
+| M14    | Blacklist & Restrictions                                                       | 4     | ⬜                                                           |
+| M15    | Audit (explorer UI, partitioning)                                              | 4     | 🟡 Table + writers done in M2; UI not started                |
+| M16    | Notifications (in-app, SMS, email, push)                                       | 4     | 🟡 Mailer + dev SMS sender exist; no notification system yet |
+| M17    | Reporting & Analytics                                                          | 4     | ⬜                                                           |
+| M19    | PWA & Performance                                                              | 4     | ⬜                                                           |
 
-### What M5 must deliver (from the plan)
+### What M7 must deliver (from the plan)
 
-- **Tables:**
-  - `master_data(type, code, label, meta, active)`
-  - `system_settings(key, value jsonb, branch_id nullable)`
-  - `match_radius_policies(scope: global|branch|category|job, ref_id, preferred_m, max_m)`, with CHECK `max_m <= 10000` (Super Admin override aside)
-- **Master data types:**
-  - job and skills: job categories, skills, education levels, languages
-  - places and documents: cities/areas, document types
-  - reason codes: rejection, blacklist, refusal
-  - holidays (used for the working-day SLA)
-- **Settings:**
-  - default and max match radius (8 km / 10 km)
-  - hold expiry days (14)
-  - counteroffer round cap (3)
-  - follow-up schedule `[7,30,90,180]`
-  - verification SLA days (2)
-  - job-review-required flag (false)
-- **Resolution order:** job → category → branch → global, with tests.
-- **UI:**
-  - Super Admin: master data CRUD and global settings
-  - Branch Admin: branch overrides, within global limits
-- **Seed:** sensible Pakistan-specific defaults (cities, skills, education levels, reason codes).
+See `IMPLEMENTATION_PLAN.md` § M7: companies, contacts, locations (geography), documents and per-type requirements, verifications with SLA (`slaDueDate` from M5), append-only verification history, the verifier queue (claim, request info, verify, reject with reason code), the employer registration wizard, and the rule that Branch Admin sees only VERIFIED companies. Reuse the `DocumentList` organism, `DOCUMENT_TYPE` meta (`appliesTo: COMPANY`) and the presign → confirm upload pattern from M6.
 
 ---
 
 ## 5. What exists today (inventory)
 
-### Database (migrations `0000`–`0008`)
+### Database (migrations `0000`–`0010`)
 
-| Area      | Tables                                                                                                                                                                                                                    |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bootstrap | Extensions `postgis`, `pgcrypto`, `citext`. Role `app_rw`. Helpers `jobbank_make_append_only(regclass)` and `jobbank_attach_updated_at(regclass)`. SQLSTATE `JB001` = append-only violation.                              |
-| System    | `audit_logs` (append-only: trigger + revoked privileges), `idempotency_keys`                                                                                                                                              |
-| Identity  | `users` (status ACTIVE/DISABLED/INVITED, `title`, `two_factor_enabled`), `sessions`, `accounts`, `verifications`, `otp_challenges` (HMAC codes), `two_factors` (encrypted TOTP), `account_tokens` (invite/reset, SHA-256) |
-| RBAC      | `roles`, `permissions`, `role_permissions` (synced from `packages/shared`), `user_roles` (branch required exactly for BRANCH_ADMIN/VERIFIER/STAFF; enforced by CHECK; unique NULLS NOT DISTINCT)                          |
-| Branches  | `branches` (code immutable, `geography(Point,4326)` location with GiST index). The matching radius lives in `match_radius_policies` since M5.                                                                             |
-| Settings  | `master_data` (12 types, `(type, code)` unique, per-type `meta`), `holidays`, `system_settings` (`key`, nullable `branch_id`), `match_radius_policies` (GLOBAL/BRANCH/CATEGORY, CHECK ≤ 10 km)                            |
+| Area      | Tables                                                                                                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Bootstrap | Extensions `postgis`, `pgcrypto`, `citext`. Role `app_rw`. Helpers `jobbank_make_append_only(regclass)` and `jobbank_attach_updated_at(regclass)`. SQLSTATE `JB001` = append-only violation.                                                                                                                                                           |
+| System    | `audit_logs` (append-only: trigger + revoked privileges), `idempotency_keys`                                                                                                                                                                                                                                                                           |
+| Identity  | `users` (status ACTIVE/DISABLED/INVITED, `title`, `two_factor_enabled`), `sessions`, `accounts`, `verifications`, `otp_challenges` (HMAC codes), `two_factors` (encrypted TOTP), `account_tokens` (invite/reset, SHA-256)                                                                                                                              |
+| RBAC      | `roles`, `permissions`, `role_permissions` (synced from `packages/shared`), `user_roles` (branch required exactly for BRANCH_ADMIN/VERIFIER/STAFF; enforced by CHECK; unique NULLS NOT DISTINCT)                                                                                                                                                       |
+| Branches  | `branches` (code immutable, `geography(Point,4326)` location with GiST index). The matching radius lives in `match_radius_policies` since M5.                                                                                                                                                                                                          |
+| Settings  | `master_data` (12 types, `(type, code)` unique, per-type `meta`), `holidays`, `system_settings` (`key`, nullable `branch_id`), `match_radius_policies` (GLOBAL/BRANCH/CATEGORY, CHECK ≤ 10 km)                                                                                                                                                         |
+| Applicant | `applicants` (CNIC unique, status DRAFT/ACTIVE/INACTIVE/RESTRICTED, identity status, completeness; ACTIVE needs a branch), `applicant_addresses` (one pin, GiST), education, experience, skills, languages, certifications, preferences (radius ≤ 10 km), `applicant_documents` (never deleted; `replaced_at`), `identity_verifications` (append-only) |
 
 ### API (`/api/v1`, all through `apiHandler`)
 
@@ -215,6 +213,19 @@ The full plan is in `IMPLEMENTATION_PLAN.md`. The status of each module:
   - `PUT /radius-policies/global`
   - `PUT` and `DELETE /radius-policies/branches/{branchId}` and `/radius-policies/categories/{categoryId}`
   - `GET /radius-policies/resolve`
+- **Applicants, self-service (M6):**
+  - `POST /applicants/register` (needs an `Idempotency-Key`)
+  - `GET` and `PATCH /applicants/me`
+  - `PUT /applicants/me/{location|education|experience|skills|languages|certifications|preferences}`
+  - `GET /applicants/me/branch-options?lat&lng`
+  - `PATCH /applicants/me/status` (pause/resume)
+  - `GET` and `POST /applicants/me/documents` (types; presign), `POST /applicants/me/documents/{id}/confirm`, `DELETE /applicants/me/documents/{id}`, `GET /applicants/me/documents/{id}/url`
+- **Applicants, staff (M6):**
+  - `GET /applicants` (branch-scoped search: name, CNIC or mobile; status, identity, skill, area, branch)
+  - `GET` and `PATCH /applicants/{id}` (PATCH = correction with reason)
+  - `POST /applicants/{id}/identity-verification`
+  - `PUT /applicants/{id}/phone`, `PATCH /applicants/{id}/status`, `POST /applicants/{id}/transfer`
+  - `GET /applicants/{id}/documents/{docId}/url` (every view is audited)
 - **Users (staff):**
   - `GET` and `POST /users` (POST needs an `Idempotency-Key`)
   - `GET` and `PATCH /users/{id}`
@@ -232,9 +243,11 @@ The full plan is in `IMPLEMENTATION_PLAN.md`. The status of each module:
   - `/forgot-password`, `/reset-password`, `/accept-invite`
   - `/account-disabled`, `/forbidden`
 - **Shared:** `/account/security`, for 2FA setup and status (admins are forced here until they enroll).
-- **Super Admin:** `/super-admin`, `/super-admin/branches` (+ `/new`, `/[id]`), `/super-admin/staff` (+ `/[id]`), `/super-admin/master-data`, `/super-admin/settings`
-- **Branch Admin:** `/branch-admin`, `/branch-admin/staff` (+ `/[id]`), `/branch-admin/settings`
-- **Welcome shells:** `/verifier`, `/staff`, `/employer`, `/applicant`
+- **Super Admin:** `/super-admin`, `/super-admin/applicants` (+ `/[id]`), `/super-admin/branches` (+ `/new`, `/[id]`), `/super-admin/staff` (+ `/[id]`), `/super-admin/master-data`, `/super-admin/settings`
+- **Branch Admin:** `/branch-admin`, `/branch-admin/applicants` (+ `/[id]`), `/branch-admin/staff` (+ `/[id]`), `/branch-admin/settings`
+- **Staff:** `/staff` (welcome shell), `/staff/applicants` (+ `/[id]`)
+- **Applicant:** `/applicant` (overview), `/applicant/profile` (wizard, `?step=`), `/applicant/documents`
+- **Welcome shells:** `/verifier`, `/employer`
 - **Dev only:** `/dev/components` (gallery, plus dashboard, auth and wizard demos). These routes return 404 in production.
 
 ### Key code locations
@@ -245,6 +258,8 @@ The full plan is in `IMPLEMENTATION_PLAN.md`. The status of each module:
 | `apps/web/src/domains/auth/`                                    | Better Auth config (`auth.ts`), `otp.ts`, `actor.ts`, `service.ts`, `account-tokens.ts`, `two-factor.ts`, `server-session.ts` (`requireRole` / `requireSignedIn`)                                               |
 | `apps/web/src/domains/branch/`, `apps/web/src/domains/user/`    | Branch and staff management; staff rules in `user/policy.ts`                                                                                                                                                    |
 | `apps/web/src/domains/settings/`                                | Master data, holidays, typed settings, radius policies (`resolveMatchRadius` for M9/M10), working-day calendar (`slaDueDate` for M7)                                                                            |
+| `apps/web/src/domains/applicant/`                               | `profile.ts` (self-service), `documents.ts` (presign/confirm/links), `staff.ts` (search, identity check, corrections, transfer), `repository.ts` (views, completeness, auto-activation), `machine.ts`           |
+| `apps/web/src/app/(dashboard)/applicant/_components/`           | Profile wizard steps (`step.ts` contract), `DocumentsManager`; shared applicant UI in `_components/applicants/`                                                                                                 |
 | `apps/web/src/components/{atoms,molecules,organisms,templates}` | The design system                                                                                                                                                                                               |
 | `apps/web/src/app/(dashboard)/_components/`                     | Role shell, navigation (`navigation.ts`, add new pages here), staff and branch UI                                                                                                                               |
 | `apps/web/src/test/`                                            | Test helpers: `api-client.ts` (cookie jar, 2FA-aware `signIn` / `signInAdmin`), `factories.ts` (`makeActor`), DOM setup, axe helper                                                                             |
@@ -259,13 +274,15 @@ The full plan is in `IMPLEMENTATION_PLAN.md`. The status of each module:
 - **Imports:** domains import each other only through `index.ts`. ESLint enforces this; shared-kernel modules are reached via `@/domains/shared/<module>`.
 - **Migrations:** after `drizzle-kit generate`, check for quoted `"geography(...)"` and unquote it (a test guards this). Add triggers with a custom migration (`drizzle-kit generate --custom`). Append-only tables call `jobbank_make_append_only`.
 - **Routes:** use `apiHandler({ permission, body, query, params, idempotent, output, handler })`. Employer-facing responses must use **strict** `output` schemas, so personal data can't leak.
-- **Tests:** unit tests are `*.test.ts`, component tests `*.test.tsx`, integration tests `*.integration.test.ts`. The test database persists between runs, so use unique emails and codes, and don't assert exact global counts.
+- **Tests:** unit tests are `*.test.ts`, component tests `*.test.tsx`, integration tests `*.integration.test.ts`. The test database persists between runs, so use unique emails and codes, and don't assert exact global counts. `signInApplicant(randomPhone())` in `test/api-client.ts` signs up/in an applicant.
+- **Client modules:** never import a constant from a `'use client'` file into a server component; put shared constants in a plain module.
+- **Uploads:** presign → browser PUT → server confirm (HEAD check + scan). Document rows are never deleted.
 
 ---
 
 ## 6. What is NOT done / open items
 
-- **Modules M6–M19.** Not started, apart from the partial pieces listed in §4.
+- **Modules M7–M19.** Not started, apart from the partial pieces listed in §4.
 - **Production SMS gateway (decision needed).** `SMS_PROVIDER=console` only prints codes to the dev log, and production refuses to start with it.
 - **Open product questions** (defaults chosen; still to confirm with stakeholders):
   - whether employers ever see applicant contact details after placement (default: no)
@@ -275,9 +292,11 @@ The full plan is in `IMPLEMENTATION_PLAN.md`. The status of each module:
   - The brand mark is a placeholder until official Saylani assets arrive.
   - The malware scanner is stubbed (`skipped`); ClamAV is planned for Phase 4.
 - **Not configured yet:**
-  - **CORS** on the S3 bucket for direct browser uploads (needed in M6, when real uploads start).
+  - **CORS** on the production R2/S3 bucket: allow `PUT` and `GET` from the app origin with the `content-type` header. Local SeaweedFS already allows it.
+  - **Clean-up job** for presigned uploads that were never confirmed (`applicant_documents.status = PENDING_UPLOAD`), planned with the Phase 4 queues.
   - **Production map tiles:** `NEXT_PUBLIC_MAP_TILE_URL` (OSM's public tiles are for development only).
-- **Git:** the repo is initialised on `main`, but **nothing has been committed yet**. Make a first commit with the owner's approval.
+- **Git:** M0–M5 are committed on `main` and pushed. M6 is not committed yet; commit it with the owner's approval before starting M7.
+- **Security clean-up (owner to do):** `creds.txt` is committed and pushed (rotate anything in it and remove it from the repo); `jobbank-backup-codes*.txt` files sit untracked in the repo root; `apps/web/src/domains/auth/otp.ts` has an uncommitted `console.log` that prints every OTP code (should be reverted).
 - **Not wired into CI yet:** Playwright end-to-end tests are planned but not added.
 
 ---
@@ -299,7 +318,7 @@ NEXT_DIST_DIR=.next-build pnpm --filter @jobbank/web build   # build without clo
   - **Super Admin and Branch Admin:** they must enroll an authenticator app at first sign-in. The local dev admin's 2FA was reset, so the owner enrolls their own phone.
 - **Email:** all email goes to Mailpit at http://localhost:8025.
 - **Last verified state:**
-  - **Tests:** 280 web tests (47 files) and 26 db tests pass (after M5).
+  - **Tests:** 312 web tests (51 files) and 34 db tests pass (after M6).
   - **Quality gates:** lint, typecheck and format are clean, and the production build is clean.
 - **Environment notes:**
   - Node runs from `/usr/local/bin` (v26). pnpm 12.8.1 is installed globally.
@@ -309,13 +328,13 @@ NEXT_DIST_DIR=.next-build pnpm --filter @jobbank/web build   # build without clo
 
 ## 8. Where to continue
 
-**M5 is built and waiting for the owner's check.** Once the owner says "go", start **M6: Applicant domain** (see `IMPLEMENTATION_PLAN.md`), following §1.
+**M6 is done and the owner accepted it.** Start **M7: Company & Verification** (see `IMPLEMENTATION_PLAN.md`), following §1: propose the M7 schema and ask the product questions first.
 
-M6 should reuse M5:
+M7 should reuse M5 and M6:
 
-- **Profile pick-lists:** `listMasterData` for skills, education levels, languages, cities, areas and document types.
-- **Upload rules:** `DOCUMENT_TYPE` meta (`mimeTypes`, `maxSizeMb`, `required`).
-- **Before uploads:** configure S3 CORS (§6).
+- **Upload rules:** `DOCUMENT_TYPE` meta with `appliesTo: COMPANY` (`mimeTypes`, `maxSizeMb`, `required`, `multiple`).
+- **Upload flow and UI:** the presign → confirm pattern and the `DocumentList` organism from M6.
+- **SLA:** `slaDueDate` / working-day calendar from M5.
 
 ## 9. Prompt to continue in a new Claude session
 
@@ -325,13 +344,13 @@ Copy and paste this into a new session opened in this project folder:
 Hi! I'm continuing the Saylani Job Bank project (Next.js 15 + Drizzle/PostGIS + Better Auth monorepo).
 Please read these files first, in this order:
 1. PROJECT_HANDOFF.md  (current status, decisions, conventions, where to continue)
-2. IMPLEMENTATION_PLAN.md  (full module plan; look at M5 and the "as built" notes)
+2. IMPLEMENTATION_PLAN.md  (full module plan; look at M7 and the "as built" notes)
 3. README.md  (how to run)
 
-Modules M0–M4 are complete and verified. Continue with M5 — Master Data & System Settings,
+Modules M0–M6 are complete and verified. Continue with M7 — Company & Verification,
 following the working agreement in PROJECT_HANDOFF.md §1: build ONE module, verify it fully
 (lint, typecheck, unit/component/integration tests, production build, browser check), then stop
 and give me a short "how to test" list, and wait for my "go" before starting the next module.
 Ask me before making product decisions. Start by checking that Docker services are up
-(pnpm infra:up) and that `pnpm test` passes, then propose the M5 schema before writing code.
+(pnpm infra:up) and that `pnpm test` passes, then propose the M7 schema before writing code.
 ```

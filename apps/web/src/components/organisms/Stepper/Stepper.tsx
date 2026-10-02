@@ -7,6 +7,9 @@ import type { StepperProps } from './stepper.types';
 export function Stepper({ steps, current, onStepClick, className }: StepperProps) {
   const active = steps[current];
   const percent = steps.length > 1 ? Math.round((current / (steps.length - 1)) * 100) : 100;
+  // Long wizards (e.g. the 7-step applicant profile): only the current step shows its label,
+  // so the markers still fit; the other labels stay available to screen readers and on hover.
+  const dense = steps.length > 5;
 
   return (
     <nav aria-label="Progress" className={cn('@container', className)}>
@@ -43,12 +46,18 @@ export function Stepper({ steps, current, onStepClick, className }: StepperProps
                 status === 'upcoming' && 'border-border-strong bg-surface text-fg-subtle',
               )}
               aria-hidden="true"
+              title={dense ? step.label : undefined}
             >
               {status === 'complete' ? <Check className="size-4" strokeWidth={3} /> : index + 1}
             </span>
           );
           const text = (
-            <span className="grid min-w-0 gap-0.5 text-start">
+            <span
+              className={cn(
+                'grid min-w-0 gap-0.5 text-start',
+                dense && status !== 'current' && 'sr-only',
+              )}
+            >
               <span
                 className={cn(
                   'text-sm font-medium break-words',

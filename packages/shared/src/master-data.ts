@@ -109,6 +109,8 @@ export const MASTER_DATA_META = {
     required: z.boolean(),
     mimeTypes: z.array(z.enum(DOCUMENT_MIME_TYPES)).min(1),
     maxSizeMb: z.number().int().min(1).max(20),
+    /** Several files of this type may be kept (certificates); otherwise a new upload replaces. */
+    multiple: z.boolean().default(false),
   }),
   REJECTION_REASON: reasonMeta,
   REFUSAL_REASON: reasonMeta,

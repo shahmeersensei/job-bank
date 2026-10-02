@@ -2,9 +2,12 @@ import type { Role } from '@jobbank/shared';
 import { ROLE_HOME } from '@jobbank/shared';
 import {
   Building2,
+  Contact,
+  FileText,
   Gauge,
   ListTree,
   SlidersHorizontal,
+  UserRound,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -32,6 +35,10 @@ export function navigationFor(role: Role): { title?: string; items: NavItemConfi
       return [
         { items: [overview] },
         {
+          title: 'Job seekers',
+          items: [{ href: '/super-admin/applicants', label: 'Applicants', icon: Contact }],
+        },
+        {
           title: 'Administration',
           items: [
             { href: '/super-admin/branches', label: 'Branches', icon: Building2 },
@@ -46,8 +53,25 @@ export function navigationFor(role: Role): { title?: string; items: NavItemConfi
         {
           items: [
             overview,
+            { href: '/branch-admin/applicants', label: 'Applicants', icon: Contact },
             { href: '/branch-admin/staff', label: 'Staff', icon: Users },
             { href: '/branch-admin/settings', label: 'Branch settings', icon: SlidersHorizontal },
+          ],
+        },
+      ];
+    case 'STAFF':
+      return [
+        {
+          items: [overview, { href: '/staff/applicants', label: 'Applicants', icon: Contact }],
+        },
+      ];
+    case 'APPLICANT':
+      return [
+        {
+          items: [
+            overview,
+            { href: '/applicant/profile', label: 'My profile', icon: UserRound },
+            { href: '/applicant/documents', label: 'Documents', icon: FileText },
           ],
         },
       ];

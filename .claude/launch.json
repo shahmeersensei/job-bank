@@ -6,6 +6,24 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@jobbank/web", "dev"],
       "port": 3000
+    },
+    {
+      "name": "web-verify",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "NEXT_DIST_DIR=.next-verify",
+        "NEXT_PUBLIC_APP_URL=http://localhost:3007",
+        "pnpm",
+        "--filter",
+        "@jobbank/web",
+        "exec",
+        "next",
+        "dev",
+        "--turbopack",
+        "-p",
+        "3007"
+      ],
+      "port": 3007
     }
   ]
 }

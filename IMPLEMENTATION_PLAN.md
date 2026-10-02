@@ -200,6 +200,24 @@ correlation-id, then session, then permission check, then branch scope, then ide
 - Staff: applicant search (filters for skills, area, status), full profile, and a verify-identity action.
 **Done when:** completeness % is computed, location is stored as a geography point, and every document upload uses a presigned URL with no file passing through the server.
 
+> **M6 decisions (owner, 2026-10-02, all recommended defaults):**
+> - **Activation is automatic:** a DRAFT profile becomes ACTIVE once personal details, the home pin + chosen branch, and the required documents (CNIC front and back) are in. Staff identity verification is a separate check; M10 should block *referral* until identity is VERIFIED.
+> - **Branch:** the applicant may pick any active branch (nearest pre-selected). Once ACTIVE, only staff can move them (Branch Admin / Super Admin transfer, audited).
+> - **Duplicate CNIC:** 409 naming the branch that holds the profile (never the other phone). Staff can move a profile to a new mobile number (account recovery, audited, old sessions end).
+> - **Locked after verification:** CNIC, full name, father's/husband's name and date of birth (and the CNIC images). Staff can correct them with a reason, which resets identity to UNVERIFIED.
+> - **Minimum age 18.** Gender: Male, Female, Prefer not to say. Father's/husband's name required.
+> - **CNIC stored in full** (13 digits, unique), masked in staff lists, never sent to employers or written to logs/audit.
+> - **Deactivation:** applicants pause/resume their own profile; staff deactivate/reactivate with a reason.
+>
+> **M6 as built (2026-10-02):**
+> - **Tables (migrations `0009`–`0010`):** `applicants`, `applicant_addresses` (one current pin, GiST index), `applicant_education`, `applicant_experience`, `applicant_skills`, `applicant_languages`, `applicant_certifications`, `applicant_preferences` (willing radius CHECK ≤ 10 km), `applicant_documents` (rows never deleted; `replaced_at`), `identity_verifications` (append-only). Phone stays on `users`.
+> - **Permissions:** new `applicant:manage` (Staff, Branch Admin) and `applicant:transfer` (Branch Admin, Super Admin). `applicant:verify_identity` stays Staff-only.
+> - **Completeness weights:** personal 20, location 20, skills 15, education 10, experience 10 ("no experience" counts), preferences 10, required documents 10, languages 5. Shared in `packages/shared/src/applicant.ts`.
+> - **Uploads:** presign (`POST /applicants/me/documents`) → browser PUT straight to S3 → confirm (`…/{id}/confirm` checks size/type with HEAD and runs the malware hook). New master-data meta flag `DOCUMENT_TYPE.multiple` (certificates and experience letters keep several files; other types replace).
+> - **Event:** `applicant.activated` (for M9). `actor.applicantId` is now filled.
+> - **UI:** applicant overview (status, what's missing, completeness checklist, branch, pause/resume), 7-step profile wizard (`?step=` deep links), Documents page; staff/Branch Admin/Super Admin applicant search and detail (identity check, audited document views, corrections, mobile change, deactivate, transfer). `DocumentList` organism built (reusable in M7). The Stepper shows only the current label when a wizard has more than 5 steps.
+> - **Not in M6 (later modules):** "My Applications", interviews and decisions screens (M10–M12); clean-up job for presigned uploads that were never confirmed (Phase 4).
+
 ### M7 — Company & Verification (`domains/company`)
 **Tables:** `companies` (legal name, NTN/registration no., industry, size, branch_id, status), `company_contacts`, `company_locations` (geography, HQ or site), `company_documents`, `company_document_requirements` (by company type), `company_verifications` (current state, assigned verifier, SLA due), `verification_history` (append-only transitions plus notes).
 **State machine:** `SUBMITTED → UNDER_VERIFICATION → INFO_REQUESTED ⇄ RESUBMITTED → VERIFIED | REJECTED`. `VERIFIED → SUSPENDED` is available through blacklist or Branch Admin.

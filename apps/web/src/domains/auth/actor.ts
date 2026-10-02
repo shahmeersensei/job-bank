@@ -53,6 +53,12 @@ export async function loadActor(userId: string, requestedActiveBranch?: string):
   ]);
 
   const roles = [...new Set(assignments.map((a) => a.role as Role))];
+  const [applicant] = roles.includes('APPLICANT')
+    ? await db
+        .select({ id: schema.applicants.id })
+        .from(schema.applicants)
+        .where(eq(schema.applicants.userId, userId))
+    : [];
   const branchIds = [
     ...new Set(assignments.map((a) => a.branchId).filter((id): id is string => id !== null)),
   ];
@@ -74,9 +80,9 @@ export async function loadActor(userId: string, requestedActiveBranch?: string):
     permissions: permissionsFor(roles),
     branchIds,
     activeBranchId,
-    // Filled in by M7 (companies) and M6 (applicant profiles).
+    // Filled in by M7 (companies).
     companyId: null,
-    applicantId: null,
+    applicantId: applicant?.id ?? null,
     twoFactorPending: requiresTwoFactor(roles) && !user?.twoFactorEnabled,
   };
 }

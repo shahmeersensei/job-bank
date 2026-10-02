@@ -12,7 +12,8 @@ import {
   type Actor,
 } from '@/domains/shared/scope';
 import { branchRadii, deleteRadiusPolicy, writeRadiusPolicy } from '@/domains/settings';
-import { db } from '@/lib/db';
+import { db, type DbExecutor } from '@/lib/db';
+import { toGeography } from '@/lib/geospatial';
 
 export interface BranchView {
   id: string;
@@ -115,6 +116,69 @@ export async function getBranch(actor: Actor, branchId: string): Promise<BranchV
   if (!branch) throw new NotFoundError('Branch', branchId);
   assertBranchAccess(actor, branch.id, { entityType: 'branch', entityId: branch.id });
   return (await withStaffCounts([branch]))[0]!;
+}
+
+/** Public contact details of a branch (shown to applicants, e.g. for account recovery). */
+export interface BranchContact {
+  id: string;
+  code: string;
+  name: string;
+  city: string;
+  address: string | null;
+  phone: string | null;
+  isActive: boolean;
+}
+
+export async function getBranchContact(
+  branchId: string,
+  executor: DbExecutor = db,
+): Promise<BranchContact | null> {
+  const [row] = await executor
+    .select({
+      id: b.id,
+      code: b.code,
+      name: b.name,
+      city: b.city,
+      address: b.address,
+      phone: b.phone,
+      isActive: b.isActive,
+    })
+    .from(b)
+    .where(eq(b.id, branchId));
+  return row ?? null;
+}
+
+export interface BranchOption extends BranchContact {
+  /** Geodesic distance from the given point; null when the branch has no map pin. */
+  distanceM: number | null;
+}
+
+/**
+ * Active branches nearest-first from `point` (applicants choosing their branch; the first
+ * one is the suggestion). Branches without a pin come last.
+ */
+export async function listBranchOptions(point: GeoPoint): Promise<BranchOption[]> {
+  const distance = sql<number | null>`ST_Distance(${b.location}, ${toGeography(point)})`.mapWith(
+    (v) => (v === null ? null : Number(v)),
+  );
+  const rows = await db
+    .select({
+      id: b.id,
+      code: b.code,
+      name: b.name,
+      city: b.city,
+      address: b.address,
+      phone: b.phone,
+      isActive: b.isActive,
+      distanceM: distance,
+    })
+    .from(b)
+    .where(eq(b.isActive, true))
+    .orderBy(sql`${distance} asc nulls last`, asc(b.name));
+  return rows.map((row) => ({
+    ...row,
+    distanceM: row.distanceM === null ? null : Math.round(row.distanceM),
+  }));
 }
 
 type SignedIn = RequestContext & { actor: Actor };

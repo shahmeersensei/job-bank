@@ -32,6 +32,13 @@ describe('permission matrix encodes the PRD rules', () => {
     expect(ROLE_PERMISSIONS.EMPLOYER).not.toContain('applicant:verify_identity');
   });
 
+  it('applicant records: staff correct them, only admins move them between branches', () => {
+    expect(holders('applicant:verify_identity')).toEqual(['STAFF']);
+    expect(holders('applicant:manage')).toEqual(['BRANCH_ADMIN', 'STAFF']);
+    expect(holders('applicant:transfer')).toEqual(['SUPER_ADMIN', 'BRANCH_ADMIN']);
+    expect(ROLE_PERMISSIONS.EMPLOYER.filter((p) => p.startsWith('applicant:'))).toEqual([]);
+  });
+
   it('only Super Admin oversees all branches and lifts restrictions', () => {
     expect(holders('scope:switch_branch')).toEqual(['SUPER_ADMIN']);
     expect(holders('restriction:lift')).toEqual(['SUPER_ADMIN']);

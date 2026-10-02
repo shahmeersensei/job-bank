@@ -64,6 +64,20 @@
       "when": 1790914094188,
       "tag": "0008_drop_branch_service_radius",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790934611134,
+      "tag": "0009_applicants",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790934620434,
+      "tag": "0010_applicant_triggers",
+      "breakpoints": true
     }
   ]
 }

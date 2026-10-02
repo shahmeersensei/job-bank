@@ -271,7 +271,8 @@ const doc = (
   required: boolean,
   mimeTypes = IMAGES_PDF,
   maxSizeMb = 5,
-): SeedItem => ({ code, label, meta: { appliesTo, required, mimeTypes, maxSizeMb } });
+  multiple = false,
+): SeedItem => ({ code, label, meta: { appliesTo, required, mimeTypes, maxSizeMb, multiple } });
 
 export const MASTER_DATA_SEED: Record<MasterDataType, SeedItem[]> = {
   JOB_CATEGORY: Object.entries(CATEGORY_SKILLS).map(([code, { label }]) => ({ code, label })),
@@ -309,8 +310,8 @@ export const MASTER_DATA_SEED: Record<MasterDataType, SeedItem[]> = {
     doc('CNIC_BACK', 'CNIC (back)', 'APPLICANT', true, ['image/jpeg', 'image/png']),
     doc('CV', 'CV / résumé', 'APPLICANT', false, ['application/pdf']),
     doc('PHOTO', 'Passport-size photo', 'APPLICANT', false, ['image/jpeg', 'image/png'], 2),
-    doc('EDUCATION_CERTIFICATE', 'Education certificate', 'APPLICANT', false),
-    doc('EXPERIENCE_LETTER', 'Experience letter', 'APPLICANT', false),
+    doc('EDUCATION_CERTIFICATE', 'Education certificate', 'APPLICANT', false, IMAGES_PDF, 5, true),
+    doc('EXPERIENCE_LETTER', 'Experience letter', 'APPLICANT', false, IMAGES_PDF, 5, true),
     doc('DRIVING_LICENSE', 'Driving licence', 'APPLICANT', false),
     doc('CHARACTER_CERTIFICATE', 'Police character certificate', 'APPLICANT', false),
     doc('AUTHORISED_PERSON_CNIC', 'CNIC of authorised person', 'COMPANY', true),

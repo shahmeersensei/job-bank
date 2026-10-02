@@ -4,3 +4,4 @@ export * from './identity';
 export * from './rbac';
 export * from './system';
 export * from './settings';
+export * from './applicants';

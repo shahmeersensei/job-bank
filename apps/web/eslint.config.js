@@ -3,7 +3,7 @@ import base from '@jobbank/config/eslint/base';
 import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
-  { ignores: ['.next/**', 'next-env.d.ts'] },
+  { ignores: ['.next/**', '.next-*/**', 'next-env.d.ts'] },
   ...base,
   {
     files: ['**/*.{ts,tsx}'],

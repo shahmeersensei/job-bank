@@ -20,7 +20,7 @@ export {
   type AuthState,
   type SessionUser,
 } from './actor';
-export { getAuth, isPlaceholderEmail, SESSION_COOKIE_PREFIX } from './auth';
+export { getAuth, isPlaceholderEmail, placeholderEmailFor, SESSION_COOKIE_PREFIX } from './auth';
 export { getServerAuthState, requireRole, requireSignedIn } from './server-session';
 export {
   AccountBlockedError,

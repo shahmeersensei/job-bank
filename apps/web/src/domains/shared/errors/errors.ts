@@ -91,3 +91,17 @@ export class RateLimitedError extends DomainError {
     this.retryAfterSeconds = retryAfterSeconds;
   }
 }
+
+/**
+ * True when `error` (or a wrapped cause, e.g. drizzle's query error) is a Postgres
+ * unique-constraint violation — optionally on one named constraint. Use it to turn the race
+ * a pre-check cannot close (two requests inserting the same value) into a ConflictError.
+ */
+export function isUniqueViolation(error: unknown, constraint?: string): boolean {
+  for (let current: unknown = error, depth = 0; current && depth < 5; depth++) {
+    const pg = current as { code?: unknown; constraint_name?: unknown; cause?: unknown };
+    if (pg.code === '23505') return constraint === undefined || pg.constraint_name === constraint;
+    current = pg.cause;
+  }
+  return false;
+}

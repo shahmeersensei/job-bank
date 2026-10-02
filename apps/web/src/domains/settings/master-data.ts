@@ -9,7 +9,7 @@ import {
   type MasterDataItem,
   type MasterDataType,
 } from '@jobbank/shared';
-import { and, asc, eq, gte, lt, type SQL } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, lt, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import { runCommand, type RequestContext } from '@/domains/shared/audit';
 import { ConflictError, NotFoundError, ValidationError, zodIssues } from '@/domains/shared/errors';
@@ -82,6 +82,36 @@ export async function listMasterData(
     .from(md)
     .where(and(...conditions))
     .orderBy(asc(md.sortOrder), asc(md.label));
+}
+
+/** Items of one type with the given codes (active or not), for validating stored references. */
+export async function findMasterDataByCodes(
+  type: MasterDataType,
+  codes: readonly string[],
+  executor: DbExecutor = db,
+): Promise<MasterDataItem[]> {
+  if (codes.length === 0) return [];
+  return executor
+    .select(columns)
+    .from(md)
+    .where(and(eq(md.type, type), inArray(md.code, [...new Set(codes)])));
+}
+
+/**
+ * code → label for the given types, including inactive items, so records that still hold a
+ * retired code keep a readable label.
+ */
+export async function masterDataLabels(
+  types: readonly MasterDataType[],
+  executor: DbExecutor = db,
+): Promise<Record<string, Record<string, string>>> {
+  const rows = await executor
+    .select({ type: md.type, code: md.code, label: md.label })
+    .from(md)
+    .where(inArray(md.type, [...types]));
+  const out: Record<string, Record<string, string>> = Object.fromEntries(types.map((t) => [t, {}]));
+  for (const row of rows) out[row.type]![row.code] = row.label;
+  return out;
 }
 
 export async function getMasterDataItem(id: string, executor: DbExecutor = db) {
